@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keamanan Server & Manajemen User</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: #eef2f7;
+            color: #1e293b;
+        }
+
+        header {
+            background: linear-gradient(135deg, #0f172a, #2563eb);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 0;
+        }
+
+        .container {
+            width: 94%;
+            max-width: 900px;
+            margin: 25px auto;
+        }
+
+        .petunjuk,
+        .soal,
+        #hasil {
+            background: white;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .petunjuk h2 {
+            color: #2563eb;
+            margin-top: 0;
+        }
+
+        .petunjuk li {
+            margin: 8px 0;
+        }
+
+        .progress-box {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .progress {
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #2563eb;
+            transition: 0.3s;
+        }
+
+        .nomor {
+            color: #2563eb;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .soal h3 {
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .pilihan {
+            display: block;
+            border: 2px solid #e2e8f0;
+            border-radius: 9px;
+            padding: 13px;
+            margin: 9px 0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .pilihan:hover {
+            background: #eff6ff;
+            border-color: #60a5fa;
+        }
+
+        .pilihan input {
+            margin-right: 10px;
+            transform: scale(1.15);
+        }
+
+        .penjelasan {
+            display: none;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 9px;
+            line-height: 1.6;
+        }
+
+        .benar {
+            background: #dcfce7;
+            border-left: 5px solid #16a34a;
+            color: #166534;
+        }
+
+        .salah {
+            background: #fee2e2;
+            border-left: 5px solid #dc2626;
+            color: #991b1b;
+        }
+
+        .tombol {
+            display: flex;
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        button {
+            flex: 1;
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-periksa {
+            background: #2563eb;
+        }
+
+        .btn-periksa:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-reset {
+            background: #64748b;
+        }
+
+        .btn-reset:hover {
+            background: #475569;
+        }
+
+        #hasil {
+            display: none;
+            text-align: center;
+        }
+
+        .nilai {
+            font-size: 55px;
+            font-weight: bold;
+            color: #2563eb;
+            margin: 10px;
+        }
+
+        .kategori {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        footer {
+            background: #0f172a;
+            color: #cbd5e1;
+            text-align: center;
+            padding: 25px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 24px;
+            }
+
+            .tombol {
+                flex-direction: column;
+            }
+
+            .soal,
+            .petunjuk,
+            #hasil {
+                padding: 17px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Keamanan Server & Manajemen User</h1>
+    <p>20 Soal Pilihan Ganda Kompleks</p>
+</header>
+
+<div class="container">
+
+    <div class="petunjuk">
+        <h2>📚 Petunjuk Pengerjaan</h2>
+
+        <ul>
+            <li>Setiap soal memiliki <b>5 pilihan jawaban (A–E)</b>.</li>
+            <li>Pilih <b>semua jawaban yang benar</b>.</li>
+            <li>Satu soal dapat memiliki lebih dari satu jawaban benar.</li>
+            <li>Tekan <b>Periksa Jawaban</b> setelah selesai.</li>
+            <li>Nilai dan pembahasan akan muncul secara otomatis.</li>
+        </ul>
+    </div>
+
+    <div class="progress-box">
+        <b>Progress: <span id="progressText">0 / 20</span></b>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <div id="hasil">
+        <h2>🎉 Hasil Kuis</h2>
+
+        <div class="nilai" id="nilaiAngka">0</div>
+
+        <p id="jumlahBenar"></p>
+
+        <div class="kategori" id="kategori"></div>
+    </div>
+
+
+    <form id="quizForm">
+
+        <!-- SOAL 1 -->
+        <div class="soal">
+            <div class="nomor">SOAL 1</div>
+
+            <h3>
+                Manakah yang merupakan tujuan utama keamanan server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q1" value="A">
+                A. Melindungi data dari akses tidak sah
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q1" value="B">
+                B. Mencegah serangan terhadap server
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q1" value="C">
+                C. Menjaga ketersediaan layanan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q1" value="D">
+                D. Memberikan semua user akses administrator
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q1" value="E">
+                E. Menjaga integritas data
+            </label>
+
+            <div class="penjelasan" id="p1"></div>
+        </div>
+
+
+        <!-- SOAL 2 -->
+        <div class="soal">
+            <div class="nomor">SOAL 2</div>
+
+            <h3>
+                Manakah praktik yang tepat untuk membuat password yang aman?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q2" value="A">
+                A. Menggunakan password yang panjang
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q2" value="B">
+                B. Menggunakan kombinasi karakter
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q2" value="C">
+                C. Menggunakan tanggal lahir
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q2" value="D">
+                D. Menggunakan password berbeda untuk akun penting
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q2" value="E">
+                E. Tidak membagikan password kepada orang lain
+            </label>
+
+            <div class="penjelasan" id="p2"></div>
+        </div>
+
+
+        <!-- SOAL 3 -->
+        <div class="soal">
+            <div class="nomor">SOAL 3</div>
+
+            <h3>
+                Apa manfaat melakukan update sistem server secara rutin?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q3" value="A">
+                A. Memperbaiki celah keamanan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q3" value="B">
+                B. Memperbaiki bug
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q3" value="C">
+                C. Meningkatkan kompatibilitas sistem
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q3" value="D">
+                D. Menghapus semua data server
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q3" value="E">
+                E. Meningkatkan keamanan sistem
+            </label>
+
+            <div class="penjelasan" id="p3"></div>
+        </div>
+
+
+        <!-- SOAL 4 -->
+        <div class="soal">
+            <div class="nomor">SOAL 4</div>
+
+            <h3>
+                Manakah yang termasuk kegiatan manajemen user?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q4" value="A">
+                A. Membuat akun user
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q4" value="B">
+                B. Menghapus akun yang tidak digunakan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q4" value="C">
+                C. Mengatur hak akses
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q4" value="D">
+                D. Mengelompokkan user dalam group
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q4" value="E">
+                E. Memberikan semua user hak root
+            </label>
+
+            <div class="penjelasan" id="p4"></div>
+        </div>
+
+
+        <!-- SOAL 5 -->
+        <div class="soal">
+            <div class="nomor">SOAL 5</div>
+
+            <h3>
+                Apa fungsi firewall pada server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q5" value="A">
+                A. Mengontrol lalu lintas jaringan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q5" value="B">
+                B. Memblokir koneksi tertentu
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q5" value="C">
+                C. Mengizinkan koneksi berdasarkan aturan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q5" value="D">
+                D. Membantu mengurangi akses jaringan yang tidak diinginkan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q5" value="E">
+                E. Menghapus semua file server
+            </label>
+
+            <div class="penjelasan" id="p5"></div>
+        </div>
+
+
+        <!-- SOAL 6 -->
+        <div class="soal">
+            <div class="nomor">SOAL 6</div>
+
+            <h3>
+                Manakah yang termasuk permission pada sistem Linux?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q6" value="A">
+                A. Read
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q6" value="B">
+                B. Write
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q6" value="C">
+                C. Execute
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q6" value="D">
+                D. Download
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q6" value="E">
+                E. Upload
+            </label>
+
+            <div class="penjelasan" id="p6"></div>
+        </div>
+
+
+        <!-- SOAL 7 -->
+        <div class="soal">
+            <div class="nomor">SOAL 7</div>
+
+            <h3>
+                Mengapa hak akses user harus dibatasi?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q7" value="A">
+                A. Mengurangi risiko penyalahgunaan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q7" value="B">
+                B. Melindungi data penting
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q7" value="C">
+                C. Mengurangi dampak jika akun disalahgunakan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q7" value="D">
+                D. Menerapkan prinsip least privilege
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q7" value="E">
+                E. Agar semua user dapat mengubah sistem
+            </label>
+
+            <div class="penjelasan" id="p7"></div>
+        </div>
+
+
+        <!-- SOAL 8 -->
+        <div class="soal">
+            <div class="nomor">SOAL 8</div>
+
+            <h3>
+                Apa yang dimaksud dengan prinsip least privilege?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q8" value="A">
+                A. Memberikan hak akses minimum
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q8" value="B">
+                B. Menyesuaikan akses dengan tugas user
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q8" value="C">
+                C. Membatasi akses terhadap sumber daya tertentu
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q8" value="D">
+                D. Memberikan semua user akses root
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q8" value="E">
+                E. Mengurangi hak yang tidak diperlukan
+            </label>
+
+            <div class="penjelasan" id="p8"></div>
+        </div>
+
+
+        <!-- SOAL 9 -->
+        <div class="soal">
+            <div class="nomor">SOAL 9</div>
+
+            <h3>
+                Manakah yang dapat meningkatkan keamanan proses login?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q9" value="A">
+                A. Password yang kuat
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q9" value="B">
+                B. Autentikasi dua faktor
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q9" value="C">
+                C. SSH key
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q9" value="D">
+                D. Membagikan password
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q9" value="E">
+                E. Membatasi percobaan login
+            </label>
+
+            <div class="penjelasan" id="p9"></div>
+        </div>
+
+
+        <!-- SOAL 10 -->
+        <div class="soal">
+            <div class="nomor">SOAL 10</div>
+
+            <h3>
+                Apa manfaat backup server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q10" value="A">
+                A. Memulihkan data yang hilang
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q10" value="B">
+                B. Membantu pemulihan setelah kerusakan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q10" value="C">
+                C. Membantu pemulihan setelah insiden keamanan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q10" value="D">
+                D. Mengurangi risiko kehilangan data
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q10" value="E">
+                E. Membuat backup tidak perlu diuji
+            </label>
+
+            <div class="penjelasan" id="p10"></div>
+        </div>
+
+
+        <!-- SOAL 11 -->
+        <div class="soal">
+            <div class="nomor">SOAL 11</div>
+
+            <h3>
+                Apa saja yang dapat dipantau pada server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q11" value="A">
+                A. Penggunaan CPU
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q11" value="B">
+                B. Penggunaan RAM
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q11" value="C">
+                C. Kapasitas penyimpanan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q11" value="D">
+                D. Log sistem
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q11" value="E">
+                E. Warna casing server
+            </label>
+
+            <div class="penjelasan" id="p11"></div>
+        </div>
+
+
+        <!-- SOAL 12 -->
+        <div class="soal">
+            <div class="nomor">SOAL 12</div>
+
+            <h3>
+                Apa fungsi log pada server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q12" value="A">
+                A. Mencatat aktivitas sistem
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q12" value="B">
+                B. Membantu troubleshooting
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q12" value="C">
+                C. Membantu mendeteksi aktivitas mencurigakan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q12" value="D">
+                D. Membantu analisis kejadian
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q12" value="E">
+                E. Menghapus semua user secara otomatis
+            </label>
+
+            <div class="penjelasan" id="p12"></div>
+        </div>
+
+
+        <!-- SOAL 13 -->
+        <div class="soal">
+            <div class="nomor">SOAL 13</div>
+
+            <h3>
+                Manakah tindakan yang dapat meningkatkan keamanan server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q13" value="A">
+                A. Menonaktifkan layanan yang tidak diperlukan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q13" value="B">
+                B. Menggunakan firewall
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q13" value="C">
+                C. Melakukan update
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q13" value="D">
+                D. Membatasi port yang terbuka
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q13" value="E">
+                E. Membiarkan semua layanan aktif
+            </label>
+
+            <div class="penjelasan" id="p13"></div>
+        </div>
+
+
+        <!-- SOAL 14 -->
+        <div class="soal">
+            <div class="nomor">SOAL 14</div>
+
+            <h3>
+                Apa manfaat penggunaan group dalam manajemen user Linux?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q14" value="A">
+                A. Mempermudah pengaturan hak akses
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q14" value="B">
+                B. Mengatur akses berdasarkan kelompok
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q14" value="C">
+                C. Mempermudah administrasi user
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q14" value="D">
+                D. Mempermudah pemberian permission
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q14" value="E">
+                E. Membuat seluruh user menjadi root
+            </label>
+
+            <div class="penjelasan" id="p14"></div>
+        </div>
+
+
+        <!-- SOAL 15 -->
+        <div class="soal">
+            <div class="nomor">SOAL 15</div>
+
+            <h3>
+                Apa risiko menggunakan akun administrator untuk kegiatan sehari-hari?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q15" value="A">
+                A. Kesalahan dapat berdampak besar
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q15" value="B">
+                B. Malware dapat memperoleh hak tinggi
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q15" value="C">
+                C. Risiko kerusakan sistem meningkat
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q15" value="D">
+                D. Prinsip least privilege tidak diterapkan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q15" value="E">
+                E. Server otomatis menjadi lebih aman
+            </label>
+
+            <div class="penjelasan" id="p15"></div>
+        </div>
+
+
+        <!-- SOAL 16 -->
+        <div class="soal">
+            <div class="nomor">SOAL 16</div>
+
+            <h3>
+                Manakah yang termasuk metode autentikasi?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q16" value="A">
+                A. Password
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q16" value="B">
+                B. SSH key
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q16" value="C">
+                C. Biometrik
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q16" value="D">
+                D. One-Time Password
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q16" value="E">
+                E. Menghapus direktori
+            </label>
+
+            <div class="penjelasan" id="p16"></div>
+        </div>
+
+
+        <!-- SOAL 17 -->
+        <div class="soal">
+            <div class="nomor">SOAL 17</div>
+
+            <h3>
+                Apa yang sebaiknya dilakukan ketika user sudah tidak membutuhkan akses server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q17" value="A">
+                A. Menonaktifkan akun
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q17" value="B">
+                B. Menghapus akun jika memang tidak diperlukan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q17" value="C">
+                C. Mencabut hak akses
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q17" value="D">
+                D. Memeriksa akses terhadap data penting
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q17" value="E">
+                E. Membagikan akun kepada user lain
+            </label>
+
+            <div class="penjelasan" id="p17"></div>
+        </div>
+
+
+        <!-- SOAL 18 -->
+        <div class="soal">
+            <div class="nomor">SOAL 18</div>
+
+            <h3>
+                Manakah yang termasuk ancaman terhadap keamanan server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q18" value="A">
+                A. Brute force
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q18" value="B">
+                B. DDoS
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q18" value="C">
+                C. Malware
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q18" value="D">
+                D. Phishing
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q18" value="E">
+                E. Backup
+            </label>
+
+            <div class="penjelasan" id="p18"></div>
+        </div>
+
+
+        <!-- SOAL 19 -->
+        <div class="soal">
+            <div class="nomor">SOAL 19</div>
+
+            <h3>
+                Apa manfaat menerapkan kebijakan keamanan user?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q19" value="A">
+                A. Mengatur penggunaan password
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q19" value="B">
+                Mengatur hak akses user
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q19" value="C">
+                Meningkatkan keamanan akun
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q19" value="D">
+                Membantu menerapkan aturan keamanan
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q19" value="E">
+                Membebaskan semua user dari aturan
+            </label>
+
+            <div class="penjelasan" id="p19"></div>
+        </div>
+
+
+        <!-- SOAL 20 -->
+        <div class="soal">
+            <div class="nomor">SOAL 20</div>
+
+            <h3>
+                Apa tindakan yang tepat ketika menemukan aktivitas mencurigakan pada server?
+            </h3>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q20" value="A">
+                A. Memeriksa log server
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q20" value="B">
+                Mengamankan akun yang terindikasi bermasalah
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q20" value="C">
+                Melakukan analisis terhadap kejadian
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q20" value="D">
+                Mencatat dan mendokumentasikan kejadian
+            </label>
+
+            <label class="pilihan">
+                <input type="checkbox" name="q20" value="E">
+                Mengabaikan kejadian tersebut
+            </label>
+
+            <div class="penjelasan" id="p20"></div>
+        </div>
+
+
+        <div class="tombol">
+            <button
+                type="button"
+                class="btn-periksa"
+                onclick="periksaJawaban()">
+                ✓ Periksa Jawaban
+            </button>
+
+            <button
+                type="button"
+                class="btn-reset"
+                onclick="resetQuiz()">
+                ↻ Ulangi Kuis
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+<footer>
+    <p>© 2026 Keamanan Server & Manajemen User</p>
+</footer>
+
+
+<script>
+
+    /* =========================
+       KUNCI JAWABAN
+    ========================= */
+
+    const kunci = {
+
+        q1: ["A", "B", "C", "E"],
+        q2: ["A", "B", "D", "E"],
+        q3: ["A", "B", "C", "E"],
+        q4: ["A", "B", "C", "D"],
+        q5: ["A", "B", "C", "D"],
+        q6: ["A", "B", "C"],
+        q7: ["A", "B", "C", "D"],
+        q8: ["A", "B", "C", "E"],
+        q9: ["A", "B", "C", "E"],
+        q10: ["A", "B", "C", "D"],
+        q11: ["A", "B", "C", "D"],
+        q12: ["A", "B", "C", "D"],
+        q13: ["A", "B", "C", "D"],
+        q14: ["A", "B", "C", "D"],
+        q15: ["A", "B", "C", "D"],
+        q16: ["A", "B", "C", "D"],
+        q17: ["A", "B", "C", "D"],
+        q18: ["A", "B", "C", "D"],
+        q19: ["A", "B", "C", "D"],
+        q20: ["A", "B", "C", "D"]
+
+    };
+
+
+    /* =========================
+       PENJELASAN
+    ========================= */
+
+    const penjelasan = {
+
+        q1:
+        "Keamanan server bertujuan menjaga kerahasiaan, integritas, dan ketersediaan data serta layanan.",
+
+        q2:
+        "Password yang panjang dan kompleks, berbeda untuk akun penting, serta tidak dibagikan kepada orang lain dapat meningkatkan keamanan akun.",
+
+        q3:
+        "Update sistem dapat memperbaiki bug, menutup celah keamanan, dan meningkatkan kompatibilitas sistem.",
+
+        q4:
+        "Manajemen user mencakup pembuatan akun, penghapusan akun, pengaturan hak akses, dan pengelompokan user.",
+
+        q5:
+        "Firewall digunakan untuk mengontrol dan menyaring lalu lintas jaringan berdasarkan aturan tertentu.",
+
+        q6:
+        "Permission dasar pada Linux terdiri dari Read (r), Write (w), dan Execute (x).",
+
+        q7:
+        "Pembatasan hak akses mengurangi risiko penyalahgunaan dan merupakan bagian dari prinsip least privilege.",
+
+        q8:
+        "Least privilege berarti setiap user hanya diberikan hak akses yang benar-benar dibutuhkan.",
+
+        q9:
+        "Password kuat, 2FA, SSH key, dan pembatasan percobaan login dapat meningkatkan keamanan login.",
+
+        q10:
+        "Backup membantu memulihkan data ketika terjadi kerusakan, kehilangan data, atau insiden keamanan.",
+
+        q11:
+        "CPU, RAM, penyimpanan, dan log merupakan beberapa komponen penting yang dapat dipantau pada server.",
+
+        q12:
+        "Log menyimpan catatan aktivitas sistem dan berguna untuk troubleshooting serta investigasi keamanan.",
+
+        q13:
+        "Menonaktifkan layanan yang tidak diperlukan, menggunakan firewall, melakukan update, dan membatasi port dapat mengurangi risiko serangan.",
+
+        q14:
+        "Group mempermudah pengaturan permission dan hak akses bagi beberapa user sekaligus.",
+
+        q15:
+        "Akun administrator memiliki hak tinggi sehingga kesalahan atau malware yang berjalan melalui akun tersebut dapat memberikan dampak lebih besar.",
+
+        q16:
+        "Password, SSH key, biometrik, dan One-Time Password merupakan contoh metode autentikasi.",
+
+        q17:
+        "Akun yang sudah tidak diperlukan sebaiknya dinonaktifkan atau dihapus dan seluruh hak aksesnya dicabut.",
+
+        q18:
+        "Brute force, DDoS, malware, dan phishing merupakan contoh ancaman keamanan.",
+
+        q19:
+        "Kebijakan keamanan membantu mengatur password, hak akses, dan aturan penggunaan akun.",
+
+        q20:
+        "Aktivitas mencurigakan harus diperiksa, diamankan, dianalisis, dan didokumentasikan untuk membantu proses penanganan insiden."
+
+    };
+
+
+    /* =========================
+       PERIKSA JAWABAN
+    ========================= */
+
+    function periksaJawaban() {
+
+        let skor = 0;
+
+        for (let i = 1; i <= 20; i++) {
+
+            const nama = "q" + i;
+
+            let dipilih = Array.from(
+                document.querySelectorAll(
+                    `input[name="${nama}"]:checked`
+                )
+            ).map(input => input.value);
+
+            let jawabanBenar = [...kunci[nama]];
+
+            dipilih.sort();
+            jawabanBenar.sort();
+
+            const benar =
+                dipilih.length === jawabanBenar.length &&
+                dipilih.every(
+                    (value, index) =>
+                    value === jawabanBenar[index]
+                );
+
+            const hasil =
+                document.getElementById("p" + i);
+
+            hasil.style.display = "block";
+
+            if (benar) {
+
+                skor++;
+
+                hasil.className =
+                    "penjelasan benar";
+
+                hasil.innerHTML = `
+                    <b>✓ Jawaban Benar!</b><br><br>
+
+                    <b>Kunci Jawaban:</b>
+                    ${jawabanBenar.join(", ")}<br><br>
+
+                    <b>Penjelasan:</b><br>
+                    ${penjelasan[nama]}
+                `;
+
+            } else {
+
+                hasil.className =
+                    "penjelasan salah";
+
+                hasil.innerHTML = `
+                    <b>✗ Jawaban Belum Tepat</b><br><br>
+
+                    <b>Kunci Jawaban:</b>
+                    ${jawabanBenar.join(", ")}<br><br>
+
+                    <b>Penjelasan:</b><br>
+                    ${penjelasan[nama]}
+                `;
+            }
+        }
+
+
+        /* HITUNG NILAI */
+
+        const nilai =
+            Math.round((skor / 20) * 100);
+
+        document.getElementById("hasil")
+            .style.display = "block";
+
+        document.getElementById("nilaiAngka")
+            .textContent = nilai;
+
+        document.getElementById("jumlahBenar")
+            .innerHTML =
+            `Jawaban benar: <b>${skor} dari 20 soal</b>`;
+
+
+        /* KATEGORI NILAI */
+
+        let kategori;
+
+        if (nilai >= 90) {
+
+            kategori = "🏆 Sangat Baik!";
+
+        } else if (nilai >= 80) {
+
+            kategori = "⭐ Baik Sekali!";
+
+        } else if (nilai >= 70) {
+
+            kategori = "👍 Baik";
+
+        } else if (nilai >= 60) {
+
+            kategori = "📖 Cukup";
+
+        } else {
+
+            kategori = "💪 Perlu Belajar Lagi";
+
+        }
+
+        document.getElementById("kategori")
+            .textContent = kategori;
+
+
+        document.getElementById("hasil")
+            .scrollIntoView({
+                behavior: "smooth"
+            });
+    }
+
+
+    /* =========================
+       RESET
+    ========================= */
+
+    function resetQuiz() {
+
+        document
+            .getElementById("quizForm")
+            .reset();
+
+        document
+            .getElementById("hasil")
+            .style.display = "none";
+
+        for (let i = 1; i <= 20; i++) {
+
+            const hasil =
+                document.getElementById("p" + i);
+
+            hasil.style.display = "none";
+            hasil.innerHTML = "";
+
+        }
+
+        updateProgress();
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    }
+
+
+    /* =========================
+       PROGRESS BAR
+    ========================= */
+
+    function updateProgress() {
+
+        let jumlah = 0;
+
+        for (let i = 1; i <= 20; i++) {
+
+            const pilihan =
+                document.querySelectorAll(
+                    `input[name="q${i}"]:checked`
+                );
+
+            if (pilihan.length > 0) {
+                jumlah++;
+            }
+        }
+
+        const persen =
+            (jumlah / 20) * 100;
+
+        document.getElementById("progressBar")
+            .style.width = persen + "%";
+
+        document.getElementById("progressText")
+            .textContent =
+            `${jumlah} / 20`;
+    }
+
+
+    document
+        .querySelectorAll(
+            "input[type='checkbox']"
+        )
+        .forEach(input => {
+
+            input.addEventListener(
+                "change",
+                updateProgress
+            );
+
+        });
+
+</script>
+
+</body>
+</html>
